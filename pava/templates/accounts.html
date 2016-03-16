@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+{% if 'added' in request.GET %}
+<div data-alert class="alert-box success text-center">
+  Account Successfully Added!
+  <a href="#" class="close">&times;</a>
+</div>
+{% endif %}
+
+<div data-alert class="alert-box secondary">
+	<h3 class="text-center">Add a bank account</h3>
+	<hr>
+
+	<form action="/accounts/new" method="post" id="new-account">
+		{% csrf_token %}
+		<div class="row">
+			<div class="large-3 columns">
+				<label>Bank Name
+					<select name="bank_institution" id="bank_institution">
+						<option value="">Select one</option>
+						{% for institution in institutions %}
+						<option value="{{institution.type}}" data-mfa="{{institution.has_mfa}}">
+							{{institution.name}}
+						</option>
+						{% endfor %}
+					</select>
+				</label>
+			</div>
+			<div class="large-3 columns">
+				<label>Bank Username
+					<input type="text" placeholder="Bank Username" name="bank_user" id="bank_user">
+				</label>
+			</div>
+			<div class="large-3 columns">
+				<label>Bank Email
+					<input type="text" placeholder="Bank Email" name="bank_email" id="bank_email">
+				</label>
+			</div>
+			<div class="large-3 columns">
+				<label>Bank Password
+					<input type="password" placeholder="Bank Password" name="bank_pass" id="bank_pass">
+				</label>
+			</div>
+		</div>
+		<div class="row">
+			<div class="large-8 columns">
+				Your account details will not be saved with Pava. They are only persisted at our data provider <a href="http://plaid.com">Plaid</a> which takes your data security very seriously. You can delete these account links at any time.
+			</div>
+			<div class="large-4 columns clearfix">
+				<input type="submit" href="#" class="button radius right" value="Add Account">
+			</div>
+		</div>
+	</form>
+</div>
+
+<h3 class="text-center">Currently Activated Accounts</h3>
+<hr>
+
+<div class="row">
+<table>
+	<thead>
+		<tr>
+			<th>Bank</th>
+			<th>Added</th>
+			<th>Actions</th>
+		</tr>
+	</thead>
+	<tbody>
+		{% for account in accounts %}
+		<tr>
+			<td>{{account.bank_type}}</td>
+			<td>{{account.added}}</td>
+			<td><a href="#">delete</a></td>
+		</tr>
+		{% endfor %}
+	</tbody>
+</table>
+</div>
+
+<div id="mfa-modal" class="reveal-modal" data-reveal>
+	<h2>Additional information required</h2>
+	<p>In order to authenticate you, your bank requires addtional information.</p>
+
+	<div class="row">
+		<div class="large-12 columns">
+			<label><span id="mfa-question">Question</span>
+				<input type="text" id="mfa-answer">
+			</label>
+		</div>
+	</div>
+	<div class="row">
+		<div class="large-12 columns clearfix">
+			<a type="submit" href="#" class="button small radius right" id="submit-mfa">Submit Answer</a>
+		</div>
+	</div>
+	<a class="close-reveal-modal">&#215;</a>
+</div>
+{% endblock content %}
+
+
+{% block js %}
+<script>
+	var token;
+	var account_type;
+
+	function start_loading(){
+		$("#new-account input").prop('disabled', true);
+		$("#new-account input[type=submit]").val('Loading...');
+	}
+
+	function stop_loading(){
+		$("#new-account input").prop('disabled', false);
+		$("#new-account input[type=submit]").val('Add Account');
+	}
+
+	$( "#new-account" ).submit(function( event ) {
+		var needs_mfa = $('#bank_institution').children(':selected').data('mfa') == "True"
+		event.preventDefault();
+		start_loading()
+
+		$.ajax({
+			type: "POST",
+			url: "/accounts/new",
+			data: {
+				'csrfmiddlewaretoken': '{{ csrf_token }}',
+				'institution': $('#bank_institution').children(':selected').val(),
+				'user': $('#bank_user').val(),
+				'email': $('#bank_email').val(),
+				'pass': $('#bank_pass').val()
+			},
+			dataType: 'json'
+		}) .done(function(data) {
+			if(data['status'] == 'fail'){
+				alert(data['message'])
+				stop_loading()
+			}else if(data['status'] == 'mfa'){
+				console.log(data)
+				$('#mfa-question').text(data['mfa'][0]['question']);
+				$('#mfa-answer').val('')
+				$._token = data['token'];
+				$._account_type = data['account_type'];
+				$('#mfa-modal').foundation('reveal', 'open');
+			}else if(data['status'] == 'ok'){
+				window.location.href="/accounts?added";
+			}
+
+		});
+	});
+
+	$('#submit-mfa').click(function(event){
+		event.preventDefault();
+		$('#mfa-modal').foundation('reveal', 'close');
+
+		$.ajax({
+			type: "POST",
+			url: "/accounts/new/step",
+			data: {
+				'csrfmiddlewaretoken': '{{ csrf_token }}',
+				'token': $._token,
+				'account_type': $._account_type,
+				'answer': $('#mfa-answer').val()
+			},
+			dataType: 'json'
+		}).done(function(data) {
+			console.log(data)
+			if(data['status'] == 'fail'){
+				alert(data['message'])
+			}else if(data['status'] == 'mfa'){
+				console.log(data)
+				$('#mfa-question').text(data['mfa'][0]['question']);
+				$('#mfa-answer').val('')
+
+				$('#mfa-modal').foundation('reveal', 'open');
+			}else if(data['status'] == 'ok'){
+				window.location.href="/accounts?added";
+
+			}
+		});
+	})
+</script>
+{% endblock js %}
+

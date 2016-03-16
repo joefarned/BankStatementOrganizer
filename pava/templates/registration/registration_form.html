@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block content %}
+<br>
+<div class="row">
+	<h3>Create New Account</h3>
+	<form class="form-horizontal" role="form" method="post" action="">
+		{% csrf_token %}
+		<fieldset>
+			{% if form.errors %}<div class="form-group has-error">
+			<label class="col-sm-2 control-label">Errors</label>
+			<div class="col-sm-10">
+				<p class="form-control-static">Please correct the errors below:
+
+					{{form.errors}}
+				</p>
+			</div>
+		</div>{% endif %}
+		<div class="form-group{% if form.username.errors %} has-error{% endif %}">
+			<label for="id_username" class="col-sm-2 control-label">Username</label>
+			<div class="col-sm-10">
+				<input type="text" class="form-control" id="id_username" placeholder="Username" name="{{form.username.name}}" value="{% if form.username.value %}{{form.username.value}}{% endif %}" required autofocus>
+				<p class="help-block">
+					{% if form.username.errors %}{{ form.username.errors|join:", " }}<br>{% endif %}
+					Username can contain any letters or numbers, without spaces
+				</p>
+			</div>
+		</div>
+		<div class="form-group{% if form.email.errors %} has-error{% endif %}">
+			<label for="id_email" class="col-sm-2 control-label">Email</label>
+			<div class="col-sm-10">
+				<input type="email" class="form-control" id="id_email" placeholder="Email" name="{{form.email.name}}" value="{% if form.email.value %}{{form.email.value}}{% endif %}" required>
+				<p class="help-block">
+					{% if form.email.errors %}{{ form.email.errors|join:", " }}<br>{% endif %}
+				</p>
+			</div>
+		</div>
+		<div class="form-group{% if form.password1.errors %} has-error{% endif %}">
+			<label for="id_password1" class="col-sm-2 control-label">Password</label>
+			<div class="col-sm-10">
+				<input type="password" class="form-control" id="id_password1" placeholder="Password" name="{{form.password1.name}}" required>
+				<p class="help-block">
+					{% if form.password1.errors %}{{ form.password1.errors|join:", " }}<br>{% endif %}
+				</p>
+			</div>
+		</div>
+		<div class="form-group{% if form.password2.errors %} has-error{% endif %}">
+			<label for="id_password2" class="col-sm-2 control-label">Password (Confirm)</label>
+			<div class="col-sm-10">
+				<input type="password" class="form-control" id="id_password2" placeholder="Password (Confirm)" name="{{form.password2.name}}" required>
+				<p class="help-block">
+					{% if form.password2.errors %}{{ form.password2.errors|join:", " }}<br>{% endif %}
+					Please confirm password
+				</p>
+			</div>
+		</div>
+		<div class="form-group">
+			<div class="col-sm-offset-2 col-sm-10">
+				<button type="submit" class="btn btn-primary">Register</button>
+			</div>
+		</div>
+	</fieldset>
+</form>
+</div>
+{% endblock content %}
+
+

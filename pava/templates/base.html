@@ -1,0 +1,74 @@
+{% load compress %}
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Pava &mdash; {% block title %}Home{% endblock title %}</title>
+	<link rel="stylesheet" href="/static/css/foundation.css" />
+	<script src="/static/js/vendor/modernizr.js"></script>
+	{% block css %}{% endblock css %}
+</head>
+<body>
+
+	<nav class="top-bar" data-topbar role="navigation">
+		<ul class="title-area">
+			<li class="name">
+				<h1><a href="/feed">Pava</a></h1>
+			</li>
+			<!-- Remove the class "menu-icon" to get rid of menu icon. Take out "Menu" to just have icon alone -->
+			<li class="toggle-topbar menu-icon"><a href="#"><span>Menu</span></a></li>
+		</ul>
+		<section class="top-bar-section">
+			<!-- Right Nav Section -->
+			<ul class="right">
+				{% if request.user.is_authenticated %}
+				<li class="has-dropdown">
+					<a href="#">Hello {{request.user}}</a>
+					<ul class="dropdown">
+						<li><a href="mailto:admin@pavawith.me">Contact us</a></li>
+						<li><a href="/logout">Logout</a></li>
+					</ul>
+				</li>
+				{% else %}
+				<li><a href="/">Home</a></li>
+				{% endif %}
+			</ul>
+			<!-- Left Nav Section -->
+			<ul class="left">
+				<li><a href="/feed">Feed</a></li>
+				<li><a href="/accounts">Accounts</a></li>
+			</ul>
+		</section>
+	</nav>
+
+	{% block content %}{% endblock content %}
+
+	<footer class="row">
+		<div class="large-12 columns">
+			<hr/>
+			<div class="row">
+				<div class="large-8 columns">
+					<p>&copy; Copyright 2014 <a href="http://rohunbansal.com/">Rohun Bansal</a>, Joe Farned, Devin Stein, Reuben Abraham.</p>
+				</div>
+				<div class="large-4 columns">
+					<ul class="inline-list right">
+						<li><a href="/privacy">Privacy Policy</a></li>
+						<li><a href="/terms">Terms of Use</a></li>
+					</ul>
+				</div>
+			</div>
+		</div>
+	</footer>
+
+	{% compress js %}
+	<script src="/static/js/vendor/jquery.js"></script>
+	<script src="/static/js/foundation.min.js"></script>
+	{% endcompress %}
+	<script>
+		$(document).foundation();
+	</script>
+
+	{% block js %}{% endblock js %}
+</body>
+</html>

@@ -1,0 +1,33 @@
+{% load core_extras %}
+<div class="row widget-box">
+    <div class="row widget-top">
+    <span class="label">{{category_name|join:" // " }}</span>
+        <div class="large-12 columns" style="background-color:black">
+            asdf
+        </div>
+    </div>
+
+    <div>
+        <div class="row">
+        <table>
+            <thead>
+                <tr>
+                    <th width="120">Date</th>
+                    <th>Merchant</th>
+                    <th width="120">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for transaction in transactions %}
+                <tr>
+                    <td>{{transaction.date}}</td>
+                    <td>{{transaction.name}}</td>
+                    <td>${{transaction.amount|negate}}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        </div>
+    </div>
+</div>
+<hr>
